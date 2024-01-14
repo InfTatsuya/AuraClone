@@ -26,7 +26,7 @@ public:
 	virtual void PlayerTick(float DeltaTime) override;
 	
 protected:
-	virtual void BeginPlay() override;\
+	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 
 private:
@@ -42,6 +42,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> MoveAction;
 
-	IEnemyInterface* LastActor;
-	IEnemyInterface* ThisActor;
+	TObjectPtr<IEnemyInterface> LastActor;
+	TObjectPtr<IEnemyInterface> ThisActor;
 };
