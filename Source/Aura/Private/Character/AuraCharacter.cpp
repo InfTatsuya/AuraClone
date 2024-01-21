@@ -48,6 +48,10 @@ void AAuraCharacter::InitAbilityActorInfo()
 	
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 	AtributeSet = AuraPlayerState->GetAttributeSet();
+	if(AtributeSet == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Atribute null"));
+	}
 
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 	
@@ -59,4 +63,5 @@ void AAuraCharacter::InitAbilityActorInfo()
 		}
 	}
 
+	InitializePrimaryAttributes();
 }
