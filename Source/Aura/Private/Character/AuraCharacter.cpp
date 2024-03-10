@@ -56,8 +56,8 @@ void AAuraCharacter::InitAbilityActorInfo()
 	AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState, this);
 	
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
-	AtributeSet = AuraPlayerState->GetAttributeSet();
-	if(AtributeSet == nullptr)
+	AttributeSet = AuraPlayerState->GetAttributeSet();
+	if(AttributeSet == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Atribute null"));
 	}
@@ -68,7 +68,7 @@ void AAuraCharacter::InitAbilityActorInfo()
 	{
 		if(AAuraHUD* AuraHUD = Cast<AAuraHUD>(AuraPlayerController->GetHUD()))
 		{
-			AuraHUD->InitOverlay(AuraPlayerController, AuraPlayerState, AbilitySystemComponent, AtributeSet);
+			AuraHUD->InitOverlay(AuraPlayerController, AuraPlayerState, AbilitySystemComponent, AttributeSet);
 		}
 	}
 
