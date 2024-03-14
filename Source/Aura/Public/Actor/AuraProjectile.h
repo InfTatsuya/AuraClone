@@ -50,4 +50,7 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UAudioComponent> LoopingSoundComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	float LifeTime = 20.f;
 };
