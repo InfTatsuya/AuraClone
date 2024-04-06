@@ -7,6 +7,7 @@
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 AAuraCharacterBase::AAuraCharacterBase()
@@ -74,19 +75,23 @@ FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(const FGamepl
 {
 	const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
 	
-	if(MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_Weapon) && IsValid(Weapon))
+	if(MontageTag.MatchesTagExact(GameplayTags.CombatSocket_Weapon) && IsValid(Weapon))
 	{
 		return Weapon->GetSocketLocation(WeaponTipSocketName);
 	}
-	if(MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_LeftHand))
+	if(MontageTag.MatchesTagExact(GameplayTags.CombatSocket_Tail))
+	{
+		return GetMesh()->GetSocketLocation(TailSocketName);
+	}
+	if(MontageTag.MatchesTagExact(GameplayTags.CombatSocket_LeftHand))
 	{
 		return GetMesh()->GetSocketLocation(LeftHandSocketName);
 	}
-	if(MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_RightHand) && IsValid(Weapon))
+	if(MontageTag.MatchesTagExact(GameplayTags.CombatSocket_RightHand) && IsValid(Weapon))
 	{
 		return GetMesh()->GetSocketLocation(RightHandSocketName);
 	}
-
+	
 	return FVector();
 }
 
@@ -135,8 +140,38 @@ TArray<FTaggedMontage> AAuraCharacterBase::GetAttackMontages_Implementation() co
 	return AttackMontages;
 }
 
+UNiagaraSystem* AAuraCharacterBase::GetBloodEffect_Implementation()
+{
+	return BloodEffect;
+}
+
+FTaggedMontage AAuraCharacterBase::GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag)
+{
+	for(const auto& TaggedMontage : AttackMontages)
+	{
+		if(TaggedMontage.MontageTag.MatchesTagExact(MontageTag))
+		{
+			return TaggedMontage;
+		}
+	}
+
+	return FTaggedMontage();
+}
+
+int32 AAuraCharacterBase::GetMinionCount_Implementation()
+{
+	return MinionCount;
+}
+
+void AAuraCharacterBase::IncrementMinionCount_Implementation(int32 Amount)
+{
+	MinionCount += Amount;
+}
+
 void AAuraCharacterBase::MulticastHandleDeath_Implementation()
 {
+	UGameplayStatics::PlaySoundAtLocation(this, DeadSound, GetActorLocation(), FRotator());
+	
 	Weapon->SetSimulatePhysics(true);
 	Weapon->SetEnableGravity(true);
 	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
