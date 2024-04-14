@@ -27,7 +27,7 @@ public:
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
 
-	virtual int32 GetPlayerLevel() override;
+	virtual int32 GetPlayerLevel_Implementation() override;
 
 	virtual void Die() override;
 	virtual AActor* GetCombatTarget_Implementation() const override;
@@ -58,9 +58,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void InitAbilityActorInfo() override;
 	virtual void InitializeDefaultAttributes() const override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults")
-	ECharacterClass CharacterClass = ECharacterClass::Warrior;
+	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults")
 	int32 Level = 1;
