@@ -3,7 +3,9 @@
 
 #include "AbilitySystem/Abilities/AuraFireBolt.h"
 #include "AuraGameplayTags.h"
-#include "Kismet/KismetSystemLibrary.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Actor/AuraProjectile.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 FString UAuraFireBolt::GetDescription(int32 Level)
 {
@@ -113,41 +115,36 @@ void UAuraFireBolt::SpawnProjectiles(const FVector& ProjectileTargetLocation, co
 	}
 
 	const FVector Forward = Rotation.Vector();
-	const FVector LeftOfSpread = Forward.RotateAngleAxis(-ProjectileSpread / 2.f, FVector::UpVector);
-	const FVector RightOfSpread = Forward.RotateAngleAxis(ProjectileSpread / 2.f, FVector::UpVector);
-
-	//const int32 NumProjectiles = FMath::Min(MaxNumProjectiles, GetAbilityLevel());
-	if(NumProjectiles > 1)
+	int32 EffectiveNumProjectiles = FMath::Min(GetAbilityLevel(), MaxNumProjectiles);
+	
+	TArray<FRotator> Rotations = UAuraAbilitySystemLibrary::EvenlySpacedRotators(Forward, FVector::UpVector, 90, EffectiveNumProjectiles);
+	for (const FRotator& Rot : Rotations)
 	{
-		const float DeltaSpread = ProjectileSpread / (NumProjectiles - 1);
-		for (int32 i = 0; i < NumProjectiles; i++)
+		FTransform SpawnTransform;
+		SpawnTransform.SetLocation(SpawnLocation);
+		SpawnTransform.SetRotation(Rot.Quaternion());
+
+		AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
+		ProjectileClass,
+		SpawnTransform,
+		GetOwningActorFromActorInfo(),
+		Cast<APawn>(GetOwningActorFromActorInfo()),
+		ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	
+		Projectile->DamageEffectParams = MakeDamageEffectParamsFromClassDefaults();
+		if(HomingTarget && HomingTarget->Implements<UCombatInterface>())
 		{
-			const FVector Direction = LeftOfSpread.RotateAngleAxis(DeltaSpread * i, FVector::UpVector);
-			const FVector Start = SpawnLocation + FVector(0,0,5);
-			UKismetSystemLibrary::DrawDebugArrow(
-				GetAvatarActorFromActorInfo(),
-				Start,
-				Start + Direction * 75.f,
-				1,
-				FLinearColor::Red,
-				120,
-				1);
+			Projectile->ProjectileMovement->HomingTargetComponent = HomingTarget->GetRootComponent();
 		}
+		else
+		{
+			Projectile->HomingTargetSceneComponent = NewObject<USceneComponent>(USceneComponent::StaticClass());
+			Projectile->HomingTargetSceneComponent->SetWorldLocation(ProjectileTargetLocation);
+			Projectile->ProjectileMovement->HomingTargetComponent = Projectile->HomingTargetSceneComponent;
+		}
+		Projectile->ProjectileMovement->HomingAccelerationMagnitude = FMath::RandRange(HomingAccelerationMin, HomingAccelerationMax);
+		Projectile->ProjectileMovement->bIsHomingProjectile = bLaunchHomingProjectiles;
+	
+		Projectile->FinishSpawning(SpawnTransform);
 	}
-	else
-	{
-		const FVector Start = SpawnLocation + FVector(0,0,5);
-		UKismetSystemLibrary::DrawDebugArrow(
-				GetAvatarActorFromActorInfo(),
-				Start,
-				Start + Forward * 75.f,
-				1,
-				FLinearColor::Red,
-				120,
-				1);
-	}
-
-	UKismetSystemLibrary::DrawDebugArrow(GetAvatarActorFromActorInfo(), SpawnLocation, SpawnLocation + Forward * 100.f, 1, FLinearColor::White, 120, 1);
-	UKismetSystemLibrary::DrawDebugArrow(GetAvatarActorFromActorInfo(), SpawnLocation, SpawnLocation + LeftOfSpread * 100.f, 1, FLinearColor::Gray, 120, 1);
-	UKismetSystemLibrary::DrawDebugArrow(GetAvatarActorFromActorInfo(), SpawnLocation, SpawnLocation + RightOfSpread * 100.f, 1, FLinearColor::Gray, 120, 1);
 }

@@ -52,6 +52,5 @@ void UDebuffNiagaraComponent::DebuffTagChanged(const FGameplayTag CallbackTag, i
 
 void UDebuffNiagaraComponent::OnOwnerActorDead(AActor* DeadActor)
 {
-	UE_LOG(LogAura, Warning, TEXT("Deactivate VFX"));
 	Deactivate();
 }
