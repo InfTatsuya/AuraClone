@@ -12,6 +12,7 @@
  */
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStatChanged, int32 /*StatValue*/);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnLevelChanged, int32 /*StatValue*/, bool /*bLevelUp*/);
 
 class ULevelUpInfo;
 class UAbilitySystemComponent;
@@ -33,7 +34,7 @@ public:
 	TObjectPtr<ULevelUpInfo> LevelUpInfo;
 
 	FOnPlayerStatChanged OnXPChangedDelegate;
-	FOnPlayerStatChanged OnLevelChangedDelegate;
+	FOnLevelChanged OnLevelChangedDelegate;
 	FOnPlayerStatChanged OnAttributePointsChangedDelegate;
 	FOnPlayerStatChanged OnSpellPointsChangedDelegate;
 
@@ -43,12 +44,14 @@ public:
 	FORCEINLINE int32 GetSpellPoints()const {return SpellPoints;}
 
 	void AddToXP(int32 InXP);
-	void AddToLevel(int32 InLevel);
+	void AddToLevel(int32 InLevel); //only for leveling up
 	void AddToAttributePoints(int32 InPoints);
 	void AddToSpellPoints(int32 InPoints);
 
 	void SetXP(int32 InXP);
-	void SetLevel(int32 InLevel);
+	void SetLevel(int32 InLevel); // only for set level when load saved data from disk
+	void SetAttributePoints(int32 InPoints);
+	void SetSpellPoints(int32 InPoints);
 
 protected:
 	UPROPERTY(VisibleAnywhere)
@@ -63,7 +66,7 @@ private:
 	int32 Level = 1;
 
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_XP);
-	int32 XP = 1;
+	int32 XP = 0;
 
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_AttributePoints);
 	int32 AttributePoints = 0;
